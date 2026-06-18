@@ -1,0 +1,38 @@
+/* styles.css */
+[v-cloak] {
+  display: none !important;
+}
+
+body {
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: #f8f9fa;
+}
+
+.table-responsive {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.nav-pills .nav-link {
+  color: #495057;
+  font-weight: 500;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #0d6efd;
+}
+
+.card {
+  border-radius: 8px;
+}
