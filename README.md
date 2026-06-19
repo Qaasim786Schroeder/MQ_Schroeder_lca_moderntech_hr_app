@@ -1,22 +1,22 @@
-# ModernTech Solutions — Proof-of-Concept HR Portal Architecture Core
+# ModernTech Solutions - Proof of Concept HR Management Portal
 
-A unified, front-end web management interface engineered to replace fragmented legacy trackers with a fast, centralized client-side environment.
+An interactive, responsive single-page web application proof-of-concept designed to replace fragmented legacy spreadsheets and centralize core human resource tasks for ModernTech Solutions.
 
-## Implemented Key Features
+## Core Features Implemented
 
-- **Central Employee Registry Dashboard:** Handles search matching parsing across dataset properties, state modification edits, and creation validations.
-- **Automated Payroll Engine System:** Tracks calculations across basic earnings, automates 20% flat PAYE deduction liabilities, and generates clean corporate digital payslips in responsive layout models.
-- **Dynamic Attendance Timeline Manager:** Log submission pipelines linked directly with back-end active balance counters. Approvals dynamically subtract time allocations and adjust active employment status flags.
-- **Fluid Multi-device Compatibility Layer:** Fully optimized scaling behavior leveraging Bootstrap grid configurations and table scroll mechanics for small viewports.
+- **Employee Directory Engine**: Real-time keyword filtering and multi-department parsing with CRUD actions (Onboard, Modify, and Terminate operations).
+- **Automated Payroll Ledger**: Reactive accounting layer rendering Base Pay, Allowances, Gross Salaries, automated 20% Income Tax cuts, and Net Pay calculation formulas.
+- **Corporate Payslip Generator**: Modular slide-out overlays providing clean salary structures and earnings item breakdowns.
+- **Leave Matrix Pipeline**: Attendance tracking and accrued vacation balance maps with an active workflow to request, approve, or deny corporate leave requests.
 
-## Core Dependencies Used
+## Technologies Utilized
 
-- Framework Layer: Vue.js 3 (CDN Options Paradigm Architecture)
-- Component Blueprint Layer: Bootstrap v5.3.3 Core Styling Components Library
-- Persistent Database Target: LocalStorage Web Client Storage Cache Engine
+- **Framework Layer**: Vue.js 3 (Client-side architecture)
+- **Design Layer**: Bootstrap 5.3.3 & Custom CSS properties
+- **Data Storage Layer**: HTML5 LocalStorage persistence API
 
-## Local Deployment Instructions
+## Application Startup Instructions
 
-1. Clone this repository cluster locally.
-2. Ensure all asset sheets (`index.html`, `app.js`, `dummyData.js`, `styles.css`) reside in the same root folder.
-3. Open `index.html` directly in a browser to run the interface locally.
+1. Clone the project repository code locally to your environment.
+2. Ensure your terminal path is located inside the root project directory.
+3. Launch the application utilizing the VS Code 'Live Server' extension button on `index.html`.

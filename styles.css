@@ -1,0 +1,128 @@
+/* Custom Global Settings & Color Variables */
+:root {
+  --primary-color: #0d6efd;
+  --success-color: #198754;
+  --dark-bg: #212529;
+  --light-bg: #f8f9fa;
+  --transition-speed: 0.25s;
+}
+
+/* Base Body Modifications */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  color: #333333;
+  min-height: 100vh;
+}
+
+/* Prevent Vue layout flashing while data parses */
+[v-cloak] {
+  display: none !important;
+}
+
+/* Smooth Tab pill transitions */
+.nav-pills .nav-link {
+  color: #555555;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all var(--transition-speed) ease-in-out;
+  padding: 0.6rem 1.2rem;
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--dark-bg);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-pills .nav-link:hover:not(.active) {
+  background-color: #e9ecef;
+  color: #000000;
+}
+
+/* Card Improvements */
+.card {
+  border-radius: 10px;
+  transition:
+    transform var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Table Custom Layout Styles */
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e3e6f0;
+}
+
+.table thead th {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
+.table tbody td {
+  padding: 1rem;
+}
+
+/* Custom Badges Configuration */
+.badge {
+  padding: 0.5em 0.85em;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Interactive Component Inputs */
+.form-control,
+.form-select {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 0.6rem 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  border-color: var(--primary-color);
+}
+
+/* Interactive Modal Panels Styling Layout */
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: none;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+/* Responsive Custom Viewports breakpoints */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+
+  .table thead {
+    font-size: 0.75rem;
+  }
+
+  .card-body h2 {
+    font-size: 1.5rem;
+  }
+}

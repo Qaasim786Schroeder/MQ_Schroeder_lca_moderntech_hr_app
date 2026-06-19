@@ -1,704 +1,631 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ModernTech Solutions - HR Management Portal</title>
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ModernTech Solutions - HR Management Portal</title>
 
-  <style>
-    [v-cloak] {
-      display: none !important;
-    }
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: #f8f9fa;
-    }
-    .table-responsive {
-      max-height: 680px;
-      overflow-y: auto;
-    }
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-    .card {
-      transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="app" v-cloak>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">ModernTech HR Portal</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <div class="navbar-nav ms-auto align-items-center">
-            <span class="nav-link active text-light-50 me-3">Proof of Concept (Client-Side)</span>
-            <button class="btn btn-sm btn-outline-danger" @click="resetToDefaultData">Reset System Database</button>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body class="bg-light">
+    <div id="app" v-cloak>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container-fluid">
+          <a class="navbar-brand fw-bold" href="#">ModernTech HR Portal</a>
+          <div class="navbar-nav ms-auto">
+            <button
+              class="btn btn-sm btn-outline-danger"
+              @click="resetToDefaultData"
+            >
+              Reset Database
+            </button>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
-    <div class="container-fluid px-4">
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-          <div class="card border-0 bg-primary text-white shadow-sm h-100">
-            <div class="card-body">
-              <h6 class="card-subtitle text-white-50 small text-uppercase fw-bold">Total Staff Pool</h6>
-              <h2 class="card-title fw-bold mb-0 mt-1">{{ employees.length }}</h2>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card border-0 bg-success text-white shadow-sm h-100">
-            <div class="card-body">
-              <h6 class="card-subtitle text-white-50 small text-uppercase fw-bold">Active Assets</h6>
-              <h2 class="card-title fw-bold mb-0 mt-1">{{ countStatus('Active') }}</h2>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card border-0 bg-warning text-dark shadow-sm h-100">
-            <div class="card-body">
-              <h6 class="card-subtitle text-dark-50 small text-uppercase fw-bold">On Active Leave</h6>
-              <h2 class="card-title fw-bold mb-0 mt-1">{{ countStatus('On Leave') }}</h2>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card border-0 bg-info text-white shadow-sm h-100">
-            <div class="card-body">
-              <h6 class="card-subtitle text-white-50 small text-uppercase fw-bold">Pending Leave Forms</h6>
-              <h2 class="card-title fw-bold mb-0 mt-1">{{ totalPendingRequests }}</h2>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <ul class="nav nav-pills bg-white p-2 rounded shadow-sm mb-4" id="hrPortalTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="directory-tab" data-bs-toggle="pill" data-bs-target="#directory-view" type="button" role="tab">Employee Records</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="payroll-tab" data-bs-toggle="pill" data-bs-target="#payroll-view" type="button" role="tab">Automated Payroll</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="attendance-tab" data-bs-toggle="pill" data-bs-target="#attendance-view" type="button" role="tab">Time Off & Tracking</button>
-        </li>
-      </ul>
-
-      <div class="tab-content" id="hrPortalTabsContent">
-        
-        <div class="tab-pane fade show active" id="directory-view" role="tabpanel">
-          <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
-            <div class="row g-3 align-items-center justify-content-between">
-              <div class="col-12 col-md-4">
-                <input type="text" class="form-control" placeholder="Search by name or email..." v-model="searchQuery">
-              </div>
-              <div class="col-12 col-md-3">
-                <select class="form-select" v-model="filterDepartment">
-                  <option value="">All Operating Departments</option>
-                  <option value="Software Development">Software Development</option>
-                  <option value="Quality Assurance">Quality Assurance</option>
-                  <option value="Customer Support">Customer Support</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Human Resources">Human Resources</option>
-                </select>
-              </div>
-              <div class="col-12 col-md-3 text-md-end">
-                <button class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#employeeFormModal" @click="triggerAddMode">
-                  + Onboard Employee
-                </button>
+      <div class="container-fluid px-4">
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="card border-0 bg-primary text-white shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="text-white-50 small text-uppercase fw-bold">
+                  Total Staff Pool
+                </h6>
+                <h2 class="fw-bold mb-0">{{ employees.length }}</h2>
               </div>
             </div>
           </div>
-
-          <div class="table-responsive bg-white shadow-sm rounded">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-dark">
-                <tr>
-                  <th>Full Name</th>
-                  <th>Contact Email</th>
-                  <th>Department</th>
-                  <th>Position</th>
-                  <th>Status</th>
-                  <th class="text-center">Action Options</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="emp in filteredEmployees" :key="emp.id">
-                  <td><span class="fw-bold text-dark">{{ emp.firstName }} {{ emp.lastName }}</span></td>
-                  <td>{{ emp.email }}</td>
-                  <td>{{ emp.department }}</td>
-                  <td>{{ emp.position }}</td>
-                  <td>
-                    <span :class="['badge', emp.status === 'Active' ? 'bg-success' : 'bg-warning text-dark']">
-                      {{ emp.status }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#employeeFormModal" @click="triggerEditMode(emp)">Modify</button>
-                    <button class="btn btn-sm btn-outline-danger" @click="deleteEmployeeRecord(emp.id)">Terminate</button>
-                  </td>
-                </tr>
-                <tr v-if="filteredEmployees.length === 0">
-                  <td colspan="6" class="text-center py-4 text-muted">No matching records found in local database storage.</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 bg-success text-white shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="text-white-50 small text-uppercase fw-bold">
+                  Active Assets
+                </h6>
+                <h2 class="fw-bold mb-0">{{ countStatus('Active') }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 bg-warning text-dark shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="text-dark-50 small text-uppercase fw-bold">
+                  On Active Leave
+                </h6>
+                <h2 class="fw-bold mb-0">{{ countStatus('On Leave') }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 bg-info text-white shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="text-white-50 small text-uppercase fw-bold">
+                  Pending Leaves
+                </h6>
+                <h2 class="fw-bold mb-0">{{ totalPendingRequests }}</h2>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="tab-pane fade" id="payroll-view" role="tabpanel">
-          <div class="table-responsive bg-white shadow-sm rounded">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-dark">
-                <tr>
-                  <th>Employee</th>
-                  <th>Base Pay</th>
-                  <th>Log Hours</th>
-                  <th>Allowance</th>
-                  <th>Gross Salary</th>
-                  <th>Tax Deductions (20%)</th>
-                  <th>Net Take-Home</th>
-                  <th class="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="emp in employees" :key="emp.id">
-                  <td><strong>{{ emp.firstName }} {{ emp.lastName }}</strong><br><small class="text-muted">{{ emp.position }}</small></td>
-                  <td>R {{ emp.salary.base.toLocaleString() }}</td>
-                  <td>{{ emp.salary.hoursWorked }} hrs</td>
-                  <td>R {{ emp.salary.allowance.toLocaleString() }}</td>
-                  <td class="fw-bold">R {{ calculateGross(emp).toLocaleString() }}</td>
-                  <td class="text-danger">R {{ calculateTax(emp).toLocaleString() }}</td>
-                  <td class="text-success fw-bold">R {{ calculateNet(emp).toLocaleString() }}</td>
-                  <td class="text-center">
-                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#payslipModal" @click="viewPayslip(emp)">
-                      Generate Payslip
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ul
+          class="nav nav-pills bg-white p-2 rounded shadow-sm mb-4"
+          id="hrPortalTabs"
+          role="tablist"
+        >
+          <li class="nav-item">
+            <button
+              class="nav-link active"
+              id="directory-tab"
+              data-bs-toggle="pill"
+              data-bs-target="#directory-view"
+              type="button"
+              role="tab"
+            >
+              Employee Records
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              id="payroll-tab"
+              data-bs-toggle="pill"
+              data-bs-target="#payroll-view"
+              type="button"
+              role="tab"
+            >
+              Automated Payroll
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              id="attendance-tab"
+              data-bs-toggle="pill"
+              data-bs-target="#attendance-view"
+              type="button"
+              role="tab"
+            >
+              Time Off & Tracking
+            </button>
+          </li>
+        </ul>
 
-        <div class="tab-pane fade" id="attendance-view" role="tabpanel">
-          <div class="row g-4">
-            <div class="col-12 col-lg-6">
-              <div class="card border-0 shadow-sm bg-white p-3 h-100">
-                <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2">Active Request Pipeline</h5>
-                <div class="table-responsive">
-                  <table class="table align-middle">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Staff Member</th>
-                        <th>Type</th>
-                        <th>Duration Window</th>
-                        <th>Status</th>
-                        <th class="text-center">Execution Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-for="emp in employees" :key="emp.id">
-                        <tr v-for="req in emp.timeOffRequests" :key="req.id">
-                          <td><strong>{{ emp.firstName }} {{ emp.lastName }}</strong></td>
-                          <td><span class="badge bg-secondary">{{ req.type }}</span></td>
-                          <td><small class="fw-semibold">{{ req.startDate }} to {{ req.endDate }}<br><span class="text-primary">({{ req.days }} Days)</span></small></td>
-                          <td>
-                            <span :class="['badge', req.status === 'Pending' ? 'bg-info' : req.status === 'Approved' ? 'bg-success' : 'bg-danger']">
-                              {{ req.status }}
-                            </span>
+        <div class="tab-content" id="hrPortalTabsContent">
+          <div
+            class="tab-pane fade show active"
+            id="directory-view"
+            role="tabpanel"
+          >
+            <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+              <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-12 col-md-4">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search by name or email..."
+                    v-model="searchQuery"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <select class="form-select" v-model="filterDepartment">
+                    <option value="">All Departments</option>
+                    <option value="Software Development">
+                      Software Development
+                    </option>
+                    <option value="Quality Assurance">Quality Assurance</option>
+                    <option value="Customer Support">Customer Support</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Human Resources">Human Resources</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3 text-md-end">
+                  <button
+                    class="btn btn-primary w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#employeeModal"
+                    @click="triggerAddMode"
+                  >
+                    + Onboard Employee
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive bg-white shadow-sm rounded">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="emp in filteredEmployees" :key="emp.id">
+                    <td>
+                      <span class="fw-bold"
+                        >{{ emp.firstName }} {{ emp.lastName }}</span
+                      >
+                    </td>
+                    <td>{{ emp.email }}</td>
+                    <td>{{ emp.department }}</td>
+                    <td>{{ emp.position }}</td>
+                    <td>
+                      <span
+                        :class="['badge', emp.status === 'Active' ? 'bg-success' : 'bg-warning text-dark']"
+                      >
+                        {{ emp.status }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button
+                        class="btn btn-sm btn-outline-secondary me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#employeeModal"
+                        @click="triggerEditMode(emp)"
+                      >
+                        Modify
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        @click="deleteEmployeeRecord(emp.id)"
+                      >
+                        Terminate
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="payroll-view" role="tabpanel">
+            <div class="table-responsive bg-white shadow-sm rounded">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Employee</th>
+                    <th>Base Pay</th>
+                    <th>Hours Logged</th>
+                    <th>Allowance</th>
+                    <th>Gross Salary</th>
+                    <th>Tax (20%)</th>
+                    <th>Net Take-Home</th>
+                    <th class="text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="emp in employees" :key="emp.id">
+                    <td>
+                      <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>
+                    </td>
+                    <td>R {{ emp.salary.base.toLocaleString() }}</td>
+                    <td>{{ emp.salary.hoursWorked }} hrs</td>
+                    <td>R {{ emp.salary.allowance.toLocaleString() }}</td>
+                    <td class="fw-bold">
+                      R {{ calculateGross(emp).toLocaleString() }}
+                    </td>
+                    <td class="text-danger">
+                      R {{ calculateTax(emp).toLocaleString() }}
+                    </td>
+                    <td class="text-success fw-bold">
+                      R {{ calculateNet(emp).toLocaleString() }}
+                    </td>
+                    <td class="text-center">
+                      <button
+                        class="btn btn-sm btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#payslipModal"
+                        @click="viewPayslip(emp)"
+                      >
+                        Payslip
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="attendance-view" role="tabpanel">
+            <div class="row g-4">
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm bg-white p-3 h-100">
+                  <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    Leave Request Pipeline
+                  </h5>
+                  <div class="table-responsive">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th>Staff</th>
+                          <th>Type</th>
+                          <th>Days</th>
+                          <th>Status</th>
+                          <th class="text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template v-for="emp in employees" :key="emp.id">
+                          <tr v-for="req in emp.timeOffRequests" :key="req.id">
+                            <td>
+                              <strong
+                                >{{ emp.firstName }} {{ emp.lastName }}</strong
+                              >
+                            </td>
+                            <td>
+                              <span class="badge bg-secondary"
+                                >{{ req.type }}</span
+                              >
+                            </td>
+                            <td>{{ req.days }} Days</td>
+                            <td>
+                              <span
+                                :class="['badge', req.status === 'Pending' ? 'bg-info' : req.status === 'Approved' ? 'bg-success' : 'bg-danger']"
+                                >{{ req.status }}</span
+                              >
+                            </td>
+                            <td class="text-center">
+                              <div
+                                v-if="req.status === 'Pending'"
+                                class="btn-group btn-group-sm"
+                              >
+                                <button
+                                  class="btn btn-success"
+                                  @click="evaluateLeave(emp.id, req.id, 'Approved')"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  class="btn btn-danger"
+                                  @click="evaluateLeave(emp.id, req.id, 'Denied')"
+                                >
+                                  Deny
+                                </button>
+                              </div>
+                              <span v-else class="text-muted small">—</span>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm bg-white p-3 h-100">
+                  <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    Accrued Leave Matrix
+                  </h5>
+                  <div class="table-responsive">
+                    <table class="table align-middle table-striped mb-0">
+                      <thead>
+                        <tr>
+                          <th>Employee</th>
+                          <th class="text-center">Present</th>
+                          <th class="text-center">Leave Balance</th>
+                          <th class="text-end">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="emp in employees" :key="emp.id">
+                          <td>{{ emp.firstName }} {{ emp.lastName }}</td>
+                          <td class="text-center text-success fw-semibold">
+                            {{ emp.attendance.present }} d
                           </td>
-                          <td class="text-center">
-                            <div v-if="req.status === 'Pending'" class="btn-group btn-group-sm">
-                              <button class="btn btn-success" @click="evaluateLeave(emp.id, req.id, 'Approved')">Approve</button>
-                              <button class="btn btn-danger" @click="evaluateLeave(emp.id, req.id, 'Denied')">Deny</button>
-                            </div>
-                            <span v-else class="text-muted small">—</span>
+                          <td class="text-center fw-bold text-primary">
+                            {{ emp.attendance.leaveBalance }} Days
+                          </td>
+                          <td class="text-end">
+                            <button
+                              class="btn btn-sm btn-outline-primary"
+                              data-bs-toggle="modal"
+                              data-bs-target="#leaveRequestModal"
+                              @click="prepLeaveForm(emp)"
+                            >
+                              + Request Leave
+                            </button>
                           </td>
                         </tr>
-                      </template>
-                      <tr v-if="totalRequestsCount === 0">
-                        <td colspan="5" class="text-center py-4 text-muted">No historical active leave files requested.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-6">
-              <div class="card border-0 shadow-sm bg-white p-3 h-100">
-                <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2">Accrued Leave Records Matrix</h5>
-                <div class="table-responsive">
-                  <table class="table align-middle table-striped mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Employee</th>
-                        <th class="text-center">Present</th>
-                        <th class="text-center">Absent</th>
-                        <th class="text-center">Leave Balance</th>
-                        <th class="text-end">File Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="emp in employees" :key="emp.id">
-                        <td>{{ emp.firstName }} {{ emp.lastName }}</td>
-                        <td class="text-center text-success fw-semibold">{{ emp.attendance.present }} d</td>
-                        <td class="text-center text-danger fw-semibold">{{ emp.attendance.absent }} d</td>
-                        <td class="text-center fw-bold text-primary">{{ emp.attendance.leaveBalance }} Days</td>
-                        <td class="text-end">
-                          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#leaveRequestModal" @click="prepLeaveForm(emp)">
-                            + Request Leave
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
 
-    <div class="modal fade" id="employeeFormModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header bg-dark text-white">
-            <h5 class="modal-title fw-bold">{{ isEditMode ? 'Modify Profile Record' : 'Onboard New Staff Asset' }}</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div
+        class="modal fade"
+        id="employeeModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+              <h5 class="modal-title fw-bold">
+                Staff Information Record Profile Form
+              </h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <form @submit.prevent="saveEmployeeRecord" id="employeeForm">
+              <div class="modal-body row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="formEmployee.firstName"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold">Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="formEmployee.lastName"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold"
+                    >Corporate Email</label
+                  >
+                  <input
+                    type="email"
+                    class="form-control"
+                    v-model="formEmployee.email"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold"
+                    >Department Allocations</label
+                  >
+                  <select
+                    class="form-select"
+                    v-model="formEmployee.department"
+                    required
+                  >
+                    <option value="Software Development">
+                      Software Development
+                    </option>
+                    <option value="Quality Assurance">Quality Assurance</option>
+                    <option value="Customer Support">Customer Support</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Human Resources">Human Resources</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold"
+                    >Position Designation</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="formEmployee.position"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold"
+                    >Base Salary (ZAR)</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    v-model.number="formEmployee.salary.base"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="modal-footer bg-light">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                  id="closeEmployeeModalBtn"
+                >
+                  Dismiss
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Save Structure Record
+                </button>
+              </div>
+            </form>
           </div>
-          <form @submit.prevent="saveEmployeeRecord" class="needs-validation" novalidate id="employeeForm">
-            <div class="modal-body row g-3">
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">First Name</label>
-                <input type="text" class="form-control" v-model="formEmployee.firstName" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Last Name</label>
-                <input type="text" class="form-control" v-model="formEmployee.lastName" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Corporate Email</label>
-                <input type="email" class="form-control" v-model="formEmployee.email" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Phone Number</label>
-                <input type="text" class="form-control" v-model="formEmployee.phone" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Department Allocations</label>
-                <select class="form-select" v-model="formEmployee.department" required>
-                  <option value="Software Development">Software Development</option>
-                  <option value="Quality Assurance">Quality Assurance</option>
-                  <option value="Customer Support">Customer Support</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Human Resources">Human Resources</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Position Designation</label>
-                <input type="text" class="form-control" v-model="formEmployee.position" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Base Salary (ZAR / Gross Base)</label>
-                <input type="number" class="form-control" v-model.number="formEmployee.salary.base" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Operating Fringe Allowance</label>
-                <input type="number" class="form-control" v-model.number="formEmployee.salary.allowance" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Initial Setup Status</label>
-                <select class="form-select" v-model="formEmployee.status" required>
-                  <option value="Active">Active</option>
-                  <option value="On Leave">On Leave</option>
-                </select>
-              </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="payslipModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content" v-if="activePayslip">
+            <div class="modal-header bg-success text-white">
+              <h5 class="modal-title fw-bold">Corporate Digital Payslip</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
             </div>
-            <div class="modal-footer bg-light">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeEmployeeModalBtn">Dismiss</button>
-              <button type="submit" class="btn btn-primary">Commit Structure Record</button>
+            <div class="modal-body">
+              <div class="text-center mb-4">
+                <h4 class="fw-bold text-success">ModernTech Solutions</h4>
+                <p class="text-muted small">Cape Town, South Africa</p>
+              </div>
+              <hr />
+              <table class="table table-bordered small mb-0">
+                <tbody>
+                  <tr>
+                    <td>Base Remuneration</td>
+                    <td class="text-end">
+                      R {{ activePayslip.salary.base.toLocaleString() }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Allowance</td>
+                    <td class="text-end">
+                      R {{ activePayslip.salary.allowance.toLocaleString() }}
+                    </td>
+                  </tr>
+                  <tr class="table-secondary fw-bold">
+                    <td>Gross Earnings</td>
+                    <td class="text-end">
+                      R {{ calculateGross(activePayslip).toLocaleString() }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-danger">Income Tax (20%)</td>
+                    <td class="text-end text-danger">
+                      - R {{ calculateTax(activePayslip).toLocaleString() }}
+                    </td>
+                  </tr>
+                  <tr class="table-success fw-bold text-success fs-6">
+                    <td>Net Pay</td>
+                    <td class="text-end">
+                      R {{ calculateNet(activePayslip).toLocaleString() }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </form>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="leaveRequestModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content" v-if="selectedLeaveEmployee">
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title fw-bold">Log Leave Request</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <form @submit.prevent="submitLeaveForm">
+              <div class="modal-body row g-3">
+                <div class="col-12">
+                  <label class="form-label small fw-bold"
+                    >Leave Typology Assignment</label
+                  >
+                  <select
+                    class="form-select"
+                    v-model="leaveFormModel.type"
+                    required
+                  >
+                    <option value="Annual">Annual Paid Leave</option>
+                    <option value="Sick">Sick Leave Allocation</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Commence Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-model="leaveFormModel.startDate"
+                    @change="calculateLeaveDays"
+                    required
+                  />
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">End Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-model="leaveFormModel.endDate"
+                    @change="calculateLeaveDays"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-bold"
+                    >Computed Operational Duration</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control bg-light text-center fw-bold"
+                    v-model="leaveFormModel.days"
+                    readonly
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                  id="closeLeaveModalBtn"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="leaveFormModel.days <= 0"
+                >
+                  Push Request
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="modal fade" id="payslipModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content" v-if="activePayslip">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title fw-bold">Corporate Digital Payslip</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body shadow-sm">
-            <div class="text-center mb-4">
-              <h4 class="fw-bold text-uppercase mb-0 text-success">ModernTech Solutions</h4>
-              <p class="text-muted small mb-0">Reg No: 2010/004523/07<br>Cape Town, South Africa</p>
-            </div>
-            <hr>
-            <div class="row small g-2 mb-3">
-              <div class="col-6"><strong>Staff Member:</strong> {{ activePayslip.firstName }} {{ activePayslip.lastName }}</div>
-              <div class="col-6 text-end"><strong>Date Issued:</strong> 2026-06-19</div>
-              <div class="col-6"><strong>Designation:</strong> {{ activePayslip.position }}</div>
-              <div class="col-6 text-end"><strong>Operational Dept:</strong> {{ activePayslip.department }}</div>
-            </div>
-            <table class="table table-bordered small mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Earning Framework Component</th>
-                  <th class="text-end">Value Calculation</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Base Monthly Contract Remuneration</td>
-                  <td class="text-end">R {{ activePayslip.salary.base.toLocaleString() }}</td>
-                </tr>
-                <tr>
-                  <td>Disbursed Allowance Subsidies</td>
-                  <td class="text-end">R {{ activePayslip.salary.allowance.toLocaleString() }}</td>
-                </tr>
-                <tr class="table-secondary fw-bold">
-                  <td>Gross Cumulative Earnings</td>
-                  <td class="text-end">R {{ calculateGross(activePayslip).toLocaleString() }}</td>
-                </tr>
-                <tr>
-                  <td class="text-danger">PAYE Core Income Tax Reductions (20%)</td>
-                  <td class="text-end text-danger">- R {{ calculateTax(activePayslip).toLocaleString() }}</td>
-                </tr>
-                <tr class="table-success fw-bold text-success fs-6">
-                  <td>Net Pay Total Remitted</td>
-                  <td class="text-end">R {{ calculateNet(activePayslip).toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="modal-footer bg-light">
-            <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close Resource Panel</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <div class="modal fade" id="leaveRequestModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content" v-if="selectedLeaveEmployee">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title fw-bold">Log Leave Request</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <form @submit.prevent="submitLeaveForm" id="leaveForm">
-            <div class="modal-body row g-3">
-              <div class="col-12">
-                <p class="mb-0">Filing corporate request status configuration for: <strong>{{ selectedLeaveEmployee.firstName }} {{ selectedLeaveEmployee.lastName }}</strong></p>
-                <small class="text-muted fw-semibold">Current Balance Assets: <span class="text-primary">{{ selectedLeaveEmployee.attendance.leaveBalance }} Days</span> available.</small>
-              </div>
-              <div class="col-12">
-                <label class="form-label small fw-bold">Leave Typology Assignment</label>
-                <select class="form-select" v-model="leaveFormModel.type" required>
-                  <option value="Annual">Annual Paid Leave</option>
-                  <option value="Sick">Sick Leave Allocation</option>
-                  <option value="Maternity">Maternity/Paternity Contingency</option>
-                </select>
-              </div>
-              <div class="col-6">
-                <label class="form-label small fw-bold">Commence Date</label>
-                <input type="date" class="form-control" v-model="leaveFormModel.startDate" @change="calculateLeaveDays" required>
-              </div>
-              <div class="col-6">
-                <label class="form-label small fw-bold">Termination Date</label>
-                <input type="date" class="form-control" v-model="leaveFormModel.endDate" @change="calculateLeaveDays" required>
-              </div>
-              <div class="col-12">
-                <label class="form-label small fw-bold text-muted">Computed Operational Duration Impact</label>
-                <input type="number" class="form-control bg-light fw-bold text-center text-primary" v-model="leaveFormModel.days" readonly>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeLeaveModalBtn">Cancel Process</button>
-              <button type="submit" class="btn btn-primary" :disabled="leaveFormModel.days <= 0">Push Request Structure</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    // Embedded Database Simulation Component Mock Data
-    const initialEmployees = [
-      {
-        id: 1, firstName: "John", lastName: "Doe", email: "john.doe@moderntech.com", phone: "082-555-0123",
-        department: "Software Development", position: "Senior Engineer", joinDate: "2020-03-15", status: "Active",
-        salary: { base: 45000, hourlyRate: 260, hoursWorked: 160, allowance: 1500 },
-        attendance: { present: 20, absent: 1, leaveBalance: 15 },
-        timeOffRequests: [{ id: 101, type: "Annual", startDate: "2026-07-01", endDate: "2026-07-05", status: "Pending", days: 5 }]
-      },
-      {
-        id: 2, firstName: "Jane", lastName: "Smith", email: "jane.smith@moderntech.com", phone: "071-555-0456",
-        department: "Quality Assurance", position: "QA Analyst", joinDate: "2021-06-10", status: "Active",
-        salary: { base: 32000, hourlyRate: 185, hoursWorked: 160, allowance: 1000 },
-        attendance: { present: 21, absent: 0, leaveBalance: 18 },
-        timeOffRequests: []
-      },
-      {
-        id: 3, firstName: "Sipho", lastName: "Mokoena", email: "s.mokoena@moderntech.com", phone: "063-555-0789",
-        department: "Software Development", position: "Frontend Developer", joinDate: "2023-01-15", status: "Active",
-        salary: { base: 38000, hourlyRate: 220, hoursWorked: 155, allowance: 1200 },
-        attendance: { present: 19, absent: 2, leaveBalance: 12 },
-        timeOffRequests: [{ id: 102, type: "Sick", startDate: "2026-06-10", endDate: "2026-06-11", status: "Approved", days: 2 }]
-      },
-      {
-        id: 4, firstName: "Elena", lastName: "Rostova", email: "e.rostova@moderntech.com", phone: "084-555-1122",
-        department: "Customer Support", position: "Support Lead", joinDate: "2019-11-01", status: "Active",
-        salary: { base: 28000, hourlyRate: 160, hoursWorked: 168, allowance: 800 },
-        attendance: { present: 21, absent: 0, leaveBalance: 22 },
-        timeOffRequests: []
-      },
-      {
-        id: 5, firstName: "David", lastName: "Kim", email: "d.kim@moderntech.com", phone: "072-555-3344",
-        department: "Sales", position: "Account Executive", joinDate: "2022-05-20", status: "Active",
-        salary: { base: 30000, hourlyRate: 173, hoursWorked: 160, allowance: 5000 },
-        attendance: { present: 20, absent: 1, leaveBalance: 14 },
-        timeOffRequests: []
-      },
-      {
-        id: 6, firstName: "Fatima", lastName: "Patel", email: "f.patel@moderntech.com", phone: "061-555-5566",
-        department: "Human Resources", position: "HR Manager", joinDate: "2018-04-01", status: "Active",
-        salary: { base: 42000, hourlyRate: 242, hoursWorked: 160, allowance: 1500 },
-        attendance: { present: 21, absent: 0, leaveBalance: 25 },
-        timeOffRequests: []
-      },
-      {
-        id: 7, firstName: "Michael", lastName: "Brown", email: "m.brown@moderntech.com", phone: "083-555-7788",
-        department: "Marketing", position: "Media Specialist", joinDate: "2024-02-10", status: "Active",
-        salary: { base: 29000, hourlyRate: 167, hoursWorked: 160, allowance: 1000 },
-        attendance: { present: 18, absent: 3, leaveBalance: 15 },
-        timeOffRequests: []
-      },
-      {
-        id: 8, firstName: "Charné", lastName: "Viljoen", email: "c.viljoen@moderntech.com", phone: "079-555-9900",
-        department: "Software Development", position: "UI/UX Designer", joinDate: "2022-09-01", status: "Active",
-        salary: { base: 36000, hourlyRate: 207, hoursWorked: 160, allowance: 1100 },
-        attendance: { present: 21, absent: 0, leaveBalance: 17 },
-        timeOffRequests: []
-      },
-      {
-        id: 9, firstName: "Amina", lastName: "Diallo", email: "a.diallo@moderntech.com", phone: "062-555-1234",
-        department: "Quality Assurance", position: "Junior QA Tester", joinDate: "2024-06-01", status: "Active",
-        salary: { base: 22000, hourlyRate: 127, hoursWorked: 160, allowance: 500 },
-        attendance: { present: 20, absent: 1, leaveBalance: 15 },
-        timeOffRequests: []
-      },
-      {
-        id: 10, firstName: "Thabo", lastName: "Ndlovu", email: "t.ndlovu@moderntech.com", phone: "082-555-5678",
-        department: "Sales", position: "Sales Director", joinDate: "2015-08-24", status: "Active",
-        salary: { base: 65000, hourlyRate: 375, hoursWorked: 160, allowance: 8500 },
-        attendance: { present: 21, absent: 0, leaveBalance: 30 },
-        timeOffRequests: []
-      },
-      {
-        id: 11, firstName: "Lisa", lastName: "Wong", email: "l.wong@moderntech.com", phone: "074-555-8910",
-        department: "Customer Support", position: "Support Agent", joinDate: "2023-11-15", status: "Active",
-        salary: { base: 20000, hourlyRate: 115, hoursWorked: 150, allowance: 400 },
-        attendance: { present: 17, absent: 4, leaveBalance: 14 },
-        timeOffRequests: []
-      },
-      {
-        id: 12, firstName: "Marcus", lastName: "Du Preez", email: "m.dupreez@moderntech.com", phone: "081-555-2468",
-        department: "Software Development", position: "DevOps Engineer", joinDate: "2021-02-28", status: "Active",
-        salary: { base: 48000, hourlyRate: 276, hoursWorked: 160, allowance: 2000 },
-        attendance: { present: 20, absent: 1, leaveBalance: 16 },
-        timeOffRequests: []
-      },
-      {
-        id: 13, firstName: "Sarah", lastName: "Jenkins", email: "s.jenkins@moderntech.com", phone: "065-555-1357",
-        department: "Marketing", position: "Content Writer", joinDate: "2023-05-05", status: "On Leave",
-        salary: { base: 25000, hourlyRate: 144, hoursWorked: 80, allowance: 600 },
-        attendance: { present: 10, absent: 0, leaveBalance: 5 },
-        timeOffRequests: [{ id: 103, type: "Maternity", startDate: "2026-06-01", endDate: "2026-08-31", status: "Approved", days: 65 }]
-      },
-      {
-        id: 14, firstName: "Owen", lastName: "Daniels", email: "o.daniels@moderntech.com", phone: "073-555-9753",
-        department: "Human Resources", position: "HR Administrator", joinDate: "2024-01-10", status: "Active",
-        salary: { base: 24000, hourlyRate: 138, hoursWorked: 160, allowance: 700 },
-        attendance: { present: 21, absent: 0, leaveBalance: 15 },
-        timeOffRequests: []
-      },
-      {
-        id: 15, firstName: "Zanele", lastName: "Sithole", email: "z.sithole@moderntech.com", phone: "084-555-8642",
-        department: "Software Development", position: "Technical Lead", joinDate: "2017-03-01", status: "Active",
-        salary: { base: 58000, hourlyRate: 334, hoursWorked: 160, allowance: 2500 },
-        attendance: { present: 21, absent: 0, leaveBalance: 24 },
-        timeOffRequests: []
-      }
-    ];
-
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          employees: JSON.parse(localStorage.getItem('moderntech_hr_employees')) || initialEmployees,
-          searchQuery: '',
-          filterDepartment: '',
-          isEditMode: false,
-          editEmployeeId: null,
-          formEmployee: this.getEmptyEmployeeObject(),
-          activePayslip: null,
-          selectedLeaveEmployee: null,
-          leaveFormModel: { type: 'Annual', startDate: '', endDate: '', days: 0 }
-        };
-      },
-      watch: {
-        employees: {
-          handler(newVal) {
-            localStorage.setItem('moderntech_hr_employees', JSON.stringify(newVal));
-          },
-          deep: true
-        }
-      },
-      computed: {
-        filteredEmployees() {
-          return this.employees.filter(emp => {
-            const matchesSearch = `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-                                 emp.email.toLowerCase().includes(this.searchQuery.toLowerCase());
-            const matchesDept = this.filterDepartment === '' || emp.department === this.filterDepartment;
-            return matchesSearch && matchesDept;
-          });
-        },
-        totalPendingRequests() {
-          return this.employees.reduce((acc, emp) => {
-            return acc + emp.timeOffRequests.filter(r => r.status === 'Pending').length;
-          }, 0);
-        },
-        totalRequestsCount() {
-          return this.employees.reduce((acc, emp) => acc + emp.timeOffRequests.length, 0);
-        }
-      },
-      methods: {
-        countStatus(statusValue) {
-          return this.employees.filter(e => e.status === statusValue).length;
-        },
-        getEmptyEmployeeObject() {
-          return {
-            firstName: '', lastName: '', email: '', phone: '', department: 'Software Development',
-            position: '', joinDate: new Date().toISOString().split('T')[0], status: 'Active',
-            salary: { base: 20000, hourlyRate: 115, hoursWorked: 160, allowance: 0 },
-            attendance: { present: 20, absent: 0, leaveBalance: 15 },
-            timeOffRequests: []
-          };
-        },
-        triggerAddMode() {
-          this.isEditMode = false;
-          this.formEmployee = this.getEmptyEmployeeObject();
-        },
-        triggerEditMode(employee) {
-          this.isEditMode = true;
-          this.editEmployeeId = employee.id;
-          this.formEmployee = JSON.parse(JSON.stringify(employee));
-        },
-        saveEmployeeRecord() {
-          const form = document.getElementById('employeeForm');
-          if (!form.checkValidity()) {
-            form.classList.add('was-validated');
-            return;
-          }
-          
-          this.formEmployee.salary.hourlyRate = Math.round(this.formEmployee.salary.base / 160);
-
-          if (this.isEditMode) {
-            const index = this.employees.findIndex(e => e.id === this.editEmployeeId);
-            if (index !== -1) {
-              this.employees[index] = { ...this.formEmployee };
-            }
-          } else {
-            this.formEmployee.id = Date.now();
-            this.employees.push({ ...this.formEmployee });
-          }
-
-          document.getElementById('closeEmployeeModalBtn').click();
-          form.classList.remove('was-validated');
-        },
-        deleteEmployeeRecord(id) {
-          if (confirm("Are you absolutely certain you wish to terminate this corporate resource profile record?")) {
-            this.employees = this.employees.filter(e => e.id !== id);
-          }
-        },
-        calculateGross(emp) {
-          return emp.salary.base + emp.salary.allowance;
-        },
-        calculateTax(emp) {
-          return Math.round(this.calculateGross(emp) * 0.20);
-        },
-        calculateNet(emp) {
-          return this.calculateGross(emp) - this.calculateTax(emp);
-        },
-        viewPayslip(employee) {
-          this.activePayslip = employee;
-        },
-        prepLeaveForm(employee) {
-          this.selectedLeaveEmployee = employee;
-          this.leaveFormModel = { type: 'Annual', startDate: '', endDate: '', days: 0 };
-        },
-        calculateLeaveDays() {
-          const start = new Date(this.leaveFormModel.startDate);
-          const end = new Date(this.leaveFormModel.endDate);
-          if (start && end && end >= start) {
-            const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            this.leaveFormModel.days = diffDays;
-          } else {
-            this.leaveFormModel.days = 0;
-          }
-        },
-        submitLeaveForm() {
-          if (this.leaveFormModel.days <= 0) return;
-          
-          const newRequest = {
-            id: Date.now(),
-            type: this.leaveFormModel.type,
-            startDate: this.leaveFormModel.startDate,
-            endDate: this.leaveFormModel.endDate,
-            days: this.leaveFormModel.days,
-            status: 'Pending'
-          };
-
-          const targetIndex = this.employees.findIndex(e => e.id === this.selectedLeaveEmployee.id);
-          if (targetIndex !== -1) {
-            this.employees[targetIndex].timeOffRequests.push(newRequest);
-          }
-
-          document.getElementById('closeLeaveModalBtn').click();
-        },
-        evaluateLeave(employeeId, requestId, resolution) {
-          const empIndex = this.employees.findIndex(e => e.id === employeeId);
-          if (empIndex === -1) return;
-
-          const reqIndex = this.employees[empIndex].
+    <script src="dummyData.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
