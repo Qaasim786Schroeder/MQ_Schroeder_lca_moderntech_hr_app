@@ -11,354 +11,541 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .login-card {
+        max-width: 420px;
+        width: 100%;
+        border-radius: 12px;
+      }
+    </style>
   </head>
   <body class="bg-light">
     <div id="app" v-cloak>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="#">ModernTech HR Portal</a>
-          <div class="navbar-nav ms-auto">
-            <button
-              class="btn btn-sm btn-outline-danger"
-              @click="resetToDefaultData"
-            >
-              Reset Database
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div class="container-fluid px-4">
-        <div class="row g-3 mb-4">
-          <div class="col-6 col-md-3">
-            <div class="card border-0 bg-primary text-white shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="text-white-50 small text-uppercase fw-bold">
-                  Total Staff Pool
-                </h6>
-                <h2 class="fw-bold mb-0">{{ employees.length }}</h2>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card border-0 bg-success text-white shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="text-white-50 small text-uppercase fw-bold">
-                  Active Assets
-                </h6>
-                <h2 class="fw-bold mb-0">{{ countStatus('Active') }}</h2>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card border-0 bg-warning text-dark shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="text-dark-50 small text-uppercase fw-bold">
-                  On Active Leave
-                </h6>
-                <h2 class="fw-bold mb-0">{{ countStatus('On Leave') }}</h2>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card border-0 bg-info text-white shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="text-white-50 small text-uppercase fw-bold">
-                  Pending Leaves
-                </h6>
-                <h2 class="fw-bold mb-0">{{ totalPendingRequests }}</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <ul
-          class="nav nav-pills bg-white p-2 rounded shadow-sm mb-4"
-          id="hrPortalTabs"
-          role="tablist"
+      <div v-if="!isLoggedIn" class="container login-container">
+        <div
+          class="card login-card border-0 shadow-lg bg-white overflow-hidden"
         >
-          <li class="nav-item">
-            <button
-              class="nav-link active"
-              id="directory-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#directory-view"
-              type="button"
-              role="tab"
+          <div class="p-4 bg-dark text-white text-center">
+            <h3 class="fw-bold mb-1 text-primary">ModernTech Solutions</h3>
+            <p class="text-white-50 small mb-0">
+              Human Resources Management Identity Portal
+            </p>
+          </div>
+          <div class="card-body p-4">
+            <div
+              v-if="loginError"
+              class="alert alert-danger py-2 small mb-3 text-center border-0"
+              role="alert"
             >
-              Employee Records
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              id="payroll-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#payroll-view"
-              type="button"
-              role="tab"
+              Invalid administration token or access password mismatch.
+            </div>
+            <form @submit.prevent="handleLogin">
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary"
+                  >Corporate Username</label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  placeholder="admin@moderntech.co.za"
+                  v-model="username"
+                  required
+                />
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-secondary"
+                  >Security Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="••••••••••••"
+                  v-model="password"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-100 py-2 fw-semibold shadow-sm"
+              >
+                Authenticate Credentials
+              </button>
+            </form>
+          </div>
+          <div class="bg-light text-center py-3 border-top">
+            <span
+              class="text-muted small text-uppercase font-monospace"
+              style="font-size: 0.75rem"
             >
-              Automated Payroll
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              id="attendance-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#attendance-view"
-              type="button"
-              role="tab"
-            >
-              Time Off & Tracking
-            </button>
-          </li>
-        </ul>
+              Secured Node Alpha-2026
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <div class="tab-content" id="hrPortalTabsContent">
-          <div
-            class="tab-pane fade show active"
-            id="directory-view"
-            role="tabpanel"
-          >
-            <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
-              <div class="row g-3 align-items-center justify-content-between">
-                <div class="col-12 col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Search by name or email..."
-                    v-model="searchQuery"
-                  />
-                </div>
-                <div class="col-12 col-md-4">
-                  <select class="form-select" v-model="filterDepartment">
-                    <option value="">All Departments</option>
-                    <option value="Software Development">
-                      Software Development
-                    </option>
-                    <option value="Quality Assurance">Quality Assurance</option>
-                    <option value="Customer Support">Customer Support</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Human Resources">Human Resources</option>
-                  </select>
-                </div>
-                <div class="col-12 col-md-3 text-md-end">
-                  <button
-                    class="btn btn-primary w-100"
-                    data-bs-toggle="modal"
-                    data-bs-target="#employeeModal"
-                    @click="triggerAddMode"
-                  >
-                    + Onboard Employee
-                  </button>
+      <div v-else>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+          <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">ModernTech HR Portal</a>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-2">
+              <button
+                class="btn btn-sm btn-outline-info"
+                data-bs-toggle="modal"
+                data-bs-target="#companyProfileModal"
+              >
+                Company Overview
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                @click="resetToDefaultData"
+              >
+                Reset Database
+              </button>
+              <button
+                class="btn btn-sm btn-danger px-3 shadow-sm"
+                @click="handleLogout"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <div class="container-fluid px-4">
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="card border-0 bg-primary text-white shadow-sm h-100">
+                <div class="card-body">
+                  <h6 class="text-white-50 small text-uppercase fw-bold">
+                    Total Staff Pool
+                  </h6>
+                  <h2 class="fw-bold mb-0">{{ employees.length }}</h2>
                 </div>
               </div>
             </div>
-
-            <div class="table-responsive bg-white shadow-sm rounded">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-dark">
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Position</th>
-                    <th>Status</th>
-                    <th class="text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="emp in filteredEmployees" :key="emp.id">
-                    <td>
-                      <span class="fw-bold"
-                        >{{ emp.firstName }} {{ emp.lastName }}</span
-                      >
-                    </td>
-                    <td>{{ emp.email }}</td>
-                    <td>{{ emp.department }}</td>
-                    <td>{{ emp.position }}</td>
-                    <td>
-                      <span
-                        :class="['badge', emp.status === 'Active' ? 'bg-success' : 'bg-warning text-dark']"
-                      >
-                        {{ emp.status }}
-                      </span>
-                    </td>
-                    <td class="text-center">
-                      <button
-                        class="btn btn-sm btn-outline-secondary me-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#employeeModal"
-                        @click="triggerEditMode(emp)"
-                      >
-                        Modify
-                      </button>
-                      <button
-                        class="btn btn-sm btn-outline-danger"
-                        @click="deleteEmployeeRecord(emp.id)"
-                      >
-                        Terminate
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="col-6 col-md-3">
+              <div class="card border-0 bg-success text-white shadow-sm h-100">
+                <div class="card-body">
+                  <h6 class="text-white-50 small text-uppercase fw-bold">
+                    Active Assets
+                  </h6>
+                  <h2 class="fw-bold mb-0">{{ countStatus('Active') }}</h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card border-0 bg-warning text-dark shadow-sm h-100">
+                <div class="card-body">
+                  <h6 class="text-dark-50 small text-uppercase fw-bold">
+                    On Active Leave
+                  </h6>
+                  <h2 class="fw-bold mb-0">
+                    {{ countStatus('On Active Leave') }}
+                  </h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card border-0 bg-info text-white shadow-sm h-100">
+                <div class="card-body">
+                  <h6 class="text-white-50 small text-uppercase fw-bold">
+                    Pending Leaves
+                  </h6>
+                  <h2 class="fw-bold mb-0">{{ totalPendingRequests }}</h2>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="tab-pane fade" id="payroll-view" role="tabpanel">
-            <div class="table-responsive bg-white shadow-sm rounded">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-dark">
-                  <tr>
-                    <th>Employee</th>
-                    <th>Base Pay</th>
-                    <th>Hours Logged</th>
-                    <th>Allowance</th>
-                    <th>Gross Salary</th>
-                    <th>Tax (20%)</th>
-                    <th>Net Take-Home</th>
-                    <th class="text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="emp in employees" :key="emp.id">
-                    <td>
-                      <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>
-                    </td>
-                    <td>R {{ emp.salary.base.toLocaleString() }}</td>
-                    <td>{{ emp.salary.hoursWorked }} hrs</td>
-                    <td>R {{ emp.salary.allowance.toLocaleString() }}</td>
-                    <td class="fw-bold">
-                      R {{ calculateGross(emp).toLocaleString() }}
-                    </td>
-                    <td class="text-danger">
-                      R {{ calculateTax(emp).toLocaleString() }}
-                    </td>
-                    <td class="text-success fw-bold">
-                      R {{ calculateNet(emp).toLocaleString() }}
-                    </td>
-                    <td class="text-center">
-                      <button
-                        class="btn btn-sm btn-success"
-                        data-bs-toggle="modal"
-                        data-bs-target="#payslipModal"
-                        @click="viewPayslip(emp)"
-                      >
-                        Payslip
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ul
+            class="nav nav-pills bg-white p-2 rounded shadow-sm mb-4"
+            id="hrPortalTabs"
+            role="tablist"
+          >
+            <li class="nav-item">
+              <button
+                class="nav-link active"
+                id="directory-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#directory-view"
+                type="button"
+                role="tab"
+              >
+                Employee Records
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                id="payroll-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#payroll-view"
+                type="button"
+                role="tab"
+              >
+                Automated Payroll
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                id="attendance-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#attendance-view"
+                type="button"
+                role="tab"
+              >
+                Time Off & Tracking
+              </button>
+            </li>
+          </ul>
 
-          <div class="tab-pane fade" id="attendance-view" role="tabpanel">
-            <div class="row g-4">
-              <div class="col-12 col-lg-6">
-                <div class="card border-0 shadow-sm bg-white p-3 h-100">
-                  <h5 class="fw-bold mb-3 border-bottom pb-2">
-                    Leave Request Pipeline
-                  </h5>
-                  <div class="table-responsive">
-                    <table class="table align-middle">
-                      <thead>
-                        <tr>
-                          <th>Staff</th>
-                          <th>Type</th>
-                          <th>Days</th>
-                          <th>Status</th>
-                          <th class="text-center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <template v-for="emp in employees" :key="emp.id">
-                          <tr v-for="req in emp.timeOffRequests" :key="req.id">
-                            <td>
-                              <strong
-                                >{{ emp.firstName }} {{ emp.lastName }}</strong
-                              >
-                            </td>
-                            <td>
-                              <span class="badge bg-secondary"
-                                >{{ req.type }}</span
-                              >
-                            </td>
-                            <td>{{ req.days }} Days</td>
-                            <td>
-                              <span
-                                :class="['badge', req.status === 'Pending' ? 'bg-info' : req.status === 'Approved' ? 'bg-success' : 'bg-danger']"
-                                >{{ req.status }}</span
-                              >
-                            </td>
-                            <td class="text-center">
-                              <div
-                                v-if="req.status === 'Pending'"
-                                class="btn-group btn-group-sm"
-                              >
-                                <button
-                                  class="btn btn-success"
-                                  @click="evaluateLeave(emp.id, req.id, 'Approved')"
-                                >
-                                  Approve
-                                </button>
-                                <button
-                                  class="btn btn-danger"
-                                  @click="evaluateLeave(emp.id, req.id, 'Denied')"
-                                >
-                                  Deny
-                                </button>
-                              </div>
-                              <span v-else class="text-muted small">—</span>
-                            </td>
-                          </tr>
-                        </template>
-                      </tbody>
-                    </table>
+          <div class="tab-content" id="hrPortalTabsContent">
+            <div
+              class="tab-pane fade show active"
+              id="directory-view"
+              role="tabpanel"
+            >
+              <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+                <div class="row g-3 align-items-center justify-content-between">
+                  <div class="col-12 col-md-4">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Search by name or email..."
+                      v-model="searchQuery"
+                    />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <select class="form-select" v-model="filterDepartment">
+                      <option value="">All Departments</option>
+                      <option value="Software Development">
+                        Software Development
+                      </option>
+                      <option value="Quality Assurance">
+                        Quality Assurance
+                      </option>
+                      <option value="Customer Support">Customer Support</option>
+                      <option value="Sales">Sales</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Human Resources">Human Resources</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-3 text-md-end">
+                    <button
+                      class="btn btn-primary w-100"
+                      data-bs-toggle="modal"
+                      data-bs-target="#employeeModal"
+                      @click="triggerAddMode"
+                    >
+                      + Onboard Employee
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div class="col-12 col-lg-6">
-                <div class="card border-0 shadow-sm bg-white p-3 h-100">
-                  <h5 class="fw-bold mb-3 border-bottom pb-2">
-                    Accrued Leave Matrix
-                  </h5>
-                  <div class="table-responsive">
-                    <table class="table align-middle table-striped mb-0">
-                      <thead>
-                        <tr>
-                          <th>Employee</th>
-                          <th class="text-center">Present</th>
-                          <th class="text-center">Leave Balance</th>
-                          <th class="text-end">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="emp in employees" :key="emp.id">
-                          <td>{{ emp.firstName }} {{ emp.lastName }}</td>
-                          <td class="text-center text-success fw-semibold">
-                            {{ emp.attendance.present }} d
-                          </td>
-                          <td class="text-center fw-bold text-primary">
-                            {{ emp.attendance.leaveBalance }} Days
-                          </td>
-                          <td class="text-end">
-                            <button
-                              class="btn btn-sm btn-outline-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target="#leaveRequestModal"
-                              @click="prepLeaveForm(emp)"
+              <div class="table-responsive bg-white shadow-sm rounded">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Full Name</th>
+                      <th>Email</th>
+                      <th>Department</th>
+                      <th>Position</th>
+                      <th>Status</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="emp in filteredEmployees" :key="emp.id">
+                      <td>
+                        <span class="fw-bold"
+                          >{{ emp.firstName }} {{ emp.lastName }}</span
+                        >
+                      </td>
+                      <td>{{ emp.email }}</td>
+                      <td>{{ emp.department }}</td>
+                      <td>{{ emp.position }}</td>
+                      <td>
+                        <span
+                          :class="['badge', emp.status === 'Active' ? 'bg-success' : 'bg-warning text-dark']"
+                        >
+                          {{ emp.status }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <button
+                          class="btn btn-sm btn-outline-secondary me-2"
+                          data-bs-toggle="modal"
+                          data-bs-target="#employeeModal"
+                          @click="triggerEditMode(emp)"
+                        >
+                          Modify
+                        </button>
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          @click="deleteEmployeeRecord(emp.id)"
+                        >
+                          Terminate
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="payroll-view" role="tabpanel">
+              <div class="table-responsive bg-white shadow-sm rounded">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Employee</th>
+                      <th>Base Pay</th>
+                      <th>Hours Logged</th>
+                      <th>Allowance</th>
+                      <th>Gross Salary</th>
+                      <th>Tax (20%)</th>
+                      <th>Net Take-Home</th>
+                      <th class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="emp in employees" :key="emp.id">
+                      <td>
+                        <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>
+                      </td>
+                      <td>R {{ emp.salary.base.toLocaleString() }}</td>
+                      <td>{{ emp.salary.hoursWorked }} hrs</td>
+                      <td>R {{ emp.salary.allowance.toLocaleString() }}</td>
+                      <td class="fw-bold">
+                        R {{ calculateGross(emp).toLocaleString() }}
+                      </td>
+                      <td class="text-danger">
+                        - R {{ calculateTax(emp).toLocaleString() }}
+                      </td>
+                      <td class="text-success fw-bold font-monospace">
+                        R {{ calculateNet(emp).toLocaleString() }}
+                      </td>
+                      <td class="text-center">
+                        <button
+                          class="btn btn-sm btn-success"
+                          data-bs-toggle="modal"
+                          data-bs-target="#payslipModal"
+                          @click="viewPayslip(emp)"
+                        >
+                          Payslip
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="attendance-view" role="tabpanel">
+              <div class="card border-0 shadow-sm bg-white p-4 mb-4">
+                <h5
+                  class="fw-bold mb-3 text-secondary text-uppercase small tracking-wider"
+                >
+                  Attendance & Core Workforce Insights
+                </h5>
+                <div class="row g-4">
+                  <div class="col-12 col-md-6 border-end">
+                    <div
+                      class="mb-2 d-flex justify-content-between align-items-center"
+                    >
+                      <span class="small fw-semibold text-muted"
+                        >Daily Attendance Stability Index</span
+                      >
+                      <span class="badge bg-success font-monospace"
+                        >{{ attendanceRate }}%</span
+                      >
+                    </div>
+                    <div
+                      class="progress rounded-pill shadow-sm"
+                      style="height: 14px"
+                    >
+                      <div
+                        class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                        role="progressbar"
+                        :style="{ width: attendanceRate + '%' }"
+                      ></div>
+                    </div>
+                    <p class="text-muted small mt-2 mb-0">
+                      Tracks percentage ratio of fully operational, active
+                      personnel against off-duty profiles.
+                    </p>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <span class="small fw-semibold text-muted d-block mb-2"
+                      >Internal Department Staff Distributions</span
+                    >
+                    <div
+                      class="progress rounded-pill shadow-sm mb-2"
+                      style="height: 18px"
+                    >
+                      <div
+                        class="progress-bar bg-primary"
+                        :style="{ width: departmentDistribution.devPct + '%' }"
+                        title="Dev"
+                      >
+                        {{ departmentDistribution.devPct }}%
+                      </div>
+                      <div
+                        class="progress-bar bg-info"
+                        :style="{ width: departmentDistribution.qaPct + '%' }"
+                        title="QA"
+                      >
+                        {{ departmentDistribution.qaPct }}%
+                      </div>
+                      <div
+                        class="progress-bar bg-warning text-dark"
+                        :style="{ width: departmentDistribution.hrPct + '%' }"
+                        title="HR"
+                      >
+                        {{ departmentDistribution.hrPct }}%
+                      </div>
+                      <div
+                        class="progress-bar bg-secondary"
+                        :style="{ width: departmentDistribution.otherPct + '%' }"
+                        title="Other"
+                      >
+                        {{ departmentDistribution.otherPct }}%
+                      </div>
+                    </div>
+                    <div
+                      class="d-flex flex-wrap gap-3 mt-1"
+                      style="font-size: 0.75rem"
+                    >
+                      <span class="text-primary">● Dev</span>
+                      <span class="text-info">● QA</span>
+                      <span class="text-warning">● HR</span>
+                      <span class="text-secondary"
+                        >● Support/Sales/Marketing</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                  <div class="card border-0 shadow-sm bg-white p-3 h-100">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                      Leave Request Pipeline
+                    </h5>
+                    <div class="table-responsive">
+                      <table class="table align-middle">
+                        <thead>
+                          <tr>
+                            <th>Staff</th>
+                            <th>Type</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template v-for="emp in employees" :key="emp.id">
+                            <tr
+                              v-for="req in emp.timeOffRequests"
+                              :key="req.id"
                             >
-                              + Request Leave
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                              <td>
+                                <strong class="text-dark"
+                                  >{{ emp.firstName }} {{ emp.lastName
+                                  }}</strong
+                                >
+                              </td>
+                              <td>
+                                <span class="badge bg-secondary"
+                                  >{{ req.type }}</span
+                                >
+                              </td>
+                              <td>{{ req.days }} Days</td>
+                              <td>
+                                <span
+                                  :class="['badge', req.status === 'Pending' ? 'bg-info' : req.status === 'Approved' ? 'bg-success' : 'bg-danger']"
+                                >
+                                  {{ req.status }}
+                                </span>
+                              </td>
+                              <td class="text-center">
+                                <div
+                                  v-if="req.status === 'Pending'"
+                                  class="btn-group btn-group-sm"
+                                >
+                                  <button
+                                    class="btn btn-success"
+                                    @click="evaluateLeave(emp.id, req.id, 'Approved')"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    class="btn btn-danger"
+                                    @click="evaluateLeave(emp.id, req.id, 'Denied')"
+                                  >
+                                    Deny
+                                  </button>
+                                </div>
+                                <span v-else class="text-muted small">—</span>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                  <div class="card border-0 shadow-sm bg-white p-3 h-100">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                      Accrued Leave Matrix
+                    </h5>
+                    <div class="table-responsive">
+                      <table class="table align-middle table-striped mb-0">
+                        <thead>
+                          <tr>
+                            <th>Employee</th>
+                            <th class="text-center">Present</th>
+                            <th class="text-center">Leave Balance</th>
+                            <th class="text-end">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="emp in employees" :key="emp.id">
+                            <td>{{ emp.firstName }} {{ emp.lastName }}</td>
+                            <td class="text-center text-success fw-semibold">
+                              {{ emp.attendance.present }} d
+                            </td>
+                            <td class="text-center fw-bold text-primary">
+                              {{ emp.attendance.leaveBalance }} Days
+                            </td>
+                            <td class="text-end">
+                              <button
+                                class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#leaveRequestModal"
+                                @click="prepLeaveForm(emp)"
+                              >
+                                + Request Leave
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -410,7 +597,7 @@
                     >Corporate Email</label
                   >
                   <input
-                    type="email"
+                    type="type"
                     class="form-control"
                     v-model="formEmployee.email"
                     required
@@ -618,6 +805,78 @@
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="companyProfileModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+              <h5 class="modal-title fw-bold">
+                ModernTech Enterprise Overview
+              </h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <h5 class="fw-bold text-primary mb-2">
+                ModernTech Solutions (Pty) Ltd
+              </h5>
+              <p class="text-muted small">
+                ModernTech Solutions is a leading technological innovator
+                headquartered within Cape Town, South Africa. The firm
+                specializes in building high-availability cloud-native systems,
+                software engineering consulting services, and enterprise
+                infrastructure architectures.
+              </p>
+              <hr />
+              <ul class="list-group list-group-flush small">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center px-0"
+                >
+                  <span class="text-secondary fw-semibold"
+                    >Established Operational Nodes</span
+                  >
+                  <span class="badge bg-secondary rounded-pill">2026</span>
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center px-0"
+                >
+                  <span class="text-secondary fw-semibold"
+                    >Headquarters Regional Target</span
+                  >
+                  <span>Cape Town, SA</span>
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center px-0"
+                >
+                  <span class="text-secondary fw-semibold"
+                    >Security Framework Directive</span
+                  >
+                  <span class="text-success fw-bold"
+                    >Active Shield (AES-256)</span
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="modal-footer bg-light py-2">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                data-bs-dismiss="modal"
+              >
+                Close Overview
+              </button>
+            </div>
           </div>
         </div>
       </div>
