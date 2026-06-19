@@ -2,21 +2,63 @@
 
 An interactive, responsive single-page web application proof-of-concept designed to replace fragmented legacy spreadsheets and centralize core human resource tasks for ModernTech Solutions.
 
-## Core Features Implemented
+---
 
-- **Employee Directory Engine**: Real-time keyword filtering and multi-department parsing with CRUD actions (Onboard, Modify, and Terminate operations).
-- **Automated Payroll Ledger**: Reactive accounting layer rendering Base Pay, Allowances, Gross Salaries, automated 20% Income Tax cuts, and Net Pay calculation formulas.
-- **Corporate Payslip Generator**: Modular slide-out overlays providing clean salary structures and earnings item breakdowns.
-- **Leave Matrix Pipeline**: Attendance tracking and accrued vacation balance maps with an active workflow to request, approve, or deny corporate leave requests.
+## 🌟 Core Features Implemented
 
-## Technologies Utilized
+### 1. Gatekeeper Authentication Secure Portal
 
-- **Framework Layer**: Vue.js 3 (Client-side architecture)
+- **Identity Verification Access**: Complete client-side security routing preventing unauthenticated access to system telemetry data.
+- **Session State Storage**: Preserves active dashboard state transitions using reactive session flags.
+
+### 2. Employee Directory Engine
+
+- **Dynamic Search Filtering**: Real-time keyword filtering across names, roles, or attributes.
+- **Department Multi-Parsing**: Dropdown filtering logic to parse records by discrete operational divisions.
+- **Full Life-Cycle CRUD Actions**: Streamlined modules for onboarding new staff, modifying profiles, and handling contract terminations.
+
+### 3. Automated Payroll Ledger
+
+- **Reactive Accounting Matrix**: Automatic formulas computing base pay, custom allowances, gross totals, 20% income tax cuts, and final net pay.
+- **Corporate Payslip Generator**: Detailed modal overlays presenting structured earnings item breakdowns for each team member.
+
+### 4. Leave Matrix Pipeline & Visual Analytics
+
+- **Live Workforce Analytics**: Real-time visual progress-bar charts tracking attendance stability metrics and internal staff distribution ratios.
+- **Approval Workflow Pipeline**: Interface allowing administrators to instantly evaluate, approve, or deny submitted leave requests.
+- **Accrued Balance Tracking**: Tracks active shift presence alongside available vacation days.
+
+---
+
+## 🛠️ System Architecture & Specifications
+
+### Technical Stack
+
+- **Framework Layer**: Vue.js 3 (Progressive Client-side engine using Composition/Options paradigms)
 - **Design Layer**: Bootstrap 5.3.3 & Custom CSS properties
-- **Data Storage Layer**: HTML5 LocalStorage persistence API
+- **Data Persistence Layer**: HTML5 LocalStorage API for data preservation
 
-## Application Startup Instructions
+### Gateway Verification Profiles
 
-1. Clone the project repository code locally to your environment.
-2. Ensure your terminal path is located inside the root project directory.
-3. Launch the application utilizing the VS Code 'Live Server' extension button on `index.html`.
+To access the system data matrices, use the following default administrative credentials:
+
+- **Username Token**: `admin@moderntech.co.za`
+- **Security Key**: `Password123!`
+
+### Structural Verification Constraints
+
+- **Minimum Data Pool**: Initialized with 15 mock employee records across primary internal departments.
+- **Income Tax Rate Rule**: Hardcoded at a 20% corporate evaluation standard.
+- **Responsive Layouts**: Fully tested layout breakpoints optimizing views for mobile, tablet, and desktop viewports.
+
+---
+
+## 🚀 Application Startup Instructions
+
+### 1. Environment Cloning
+
+Clone the project repository code locally to your environment:
+
+```bash
+git clone [https://github.com/your-username/MQ_Schroeder_lca_moderntech_hr_app.git](https://github.com/your-username/MQ_Schroeder_lca_moderntech_hr_app.git)
+```
